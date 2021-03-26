@@ -3,3 +3,7 @@ setwd("#FILE_PATH#")
 library(readxl)
 Texas_County_Sales_taxes <- read_excel("#FILE_ADDRESS#")
 cameron <- ts(Texas_County_Sales_taxes$Cameron, start=c(2012,12),end=c(2021,2),frequency = 12)
+
+#Q1#
+
+autoplot(cameron, ylab='Tax Receipts ($)', xlab='Time'
