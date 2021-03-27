@@ -7,3 +7,62 @@ cameron <- ts(Texas_County_Sales_taxes$Cameron, start=c(2012,12),end=c(2021,2),f
 #Q1#
 library(fpp2)
 autoplot(cameron, ylab='Tax Receipts ($)', xlab='Time', main='Cameron County Sales Tax Receipts')
+
+
+#Q2#
+#Establishing Training Sub-Set
+training <- window(Cameron,end=c(2020,8))
+autoplot(training)+
+  ggtitle("Sales Tax Revenue for Cameron County - Training Sub-Set")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Establishing Test(Accuracy) Sub-Set
+test <- window(Cameron, start=c(2020,9), end=c(2021,2))
+autoplot(test)+
+  ggtitle("Sales Tax Revenue for Cameron County - Test Sub-Set")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating ETS Forecast
+#ETS Function
+ETS <- ets(training,"ZZZ")
+
+#ETS Forecast
+CameronETSForecast <-forecast(ETS,h=6)$mean
+autoplot(training)+
+  autolayer(CameronETSForecast)+
+  ggtitle("Sales Tax Receipts - ETS Forecast for Cameron County")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating Accuracy Measure
+accuracyETS <- accuracy(CameronETSForecast,test)
+
+#Converting Accuracy Data to Table Format
+write.csv(accuracyETS, "accuracyETS.csv")
+
+#Creating Arima Forecast
+CameronArima <- auto.arima(training,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
+CameronArimaForecast <- forecast(CameronArima,h=6)$mean
+autoplot(training)+
+  autolayer(CameronArimaForecast)+
+  ggtitle("Sales Tax Receipts - Arima Forecast for Cameron County")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating Accuracy Measure
+accuracyARIMA <- accuracy(CameronArimaForecast,test)
+
+#Converting Accuracy Data to Table Format
+write.csv(accuracyARIMA, "accuracyARIMA.csv")
+
+
+#Layering Both ETS AND ARIMA WITH ACTUAL DATA
+autoplot(test)+
+  autolayer(CameronETSForecast)+
+  autolayer(CameronArimaForecast)+
+  ggtitle("Sales Tax Receipts - Comparison of ETS, Arima, and Orginial")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
