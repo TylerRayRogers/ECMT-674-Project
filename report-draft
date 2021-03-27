@@ -1,3 +1,16 @@
 1. Components of Variable
 [insert cameron_autoplot; issue 1]
-  a.
+  a)
+    There is a definite upward trend in this data, which can be visualized here:
+    [plot of trend component]
+    This can be expected due to both rising population and the presence of inflation. Since this is a sales tax variable, it will clearly follow along consumer spending amounts.
+  b)
+    There is also a definite annual seasonal trend. It can easily be seen that receipts peak each December and trough every January, with multiple other small spikes and falls         occurring regularly throughout they year. Here is the isolated seasonal component:
+     [plot of seasonal component]
+    This indicates that consumer spending habits generally follow a pattern, year-to-year. The spike at the end of each year can be assumed to be due to the holidays encouraging       buying.
+  c)
+    Visually, there appears to be no cyclical movement which suggests the absence of a dependence of the business cycle. That makes sense because individual consumers will still       purchase and sell as normal, barring a major economic event.
+
+2. Univariate Forecasting Models
+
+3. Multivariate Forecasting Model
