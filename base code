@@ -7,3 +7,6 @@ cameron <- ts(Texas_County_Sales_taxes$Cameron, start=c(2012,12),end=c(2021,2),f
 #Q1#
 library(fpp2)
 autoplot(cameron, ylab='Tax Receipts ($)', xlab='Time', main='Cameron County Sales Tax Receipts')
+
+cameron_ets <- ets(cameron,"ZZZ) #RETURNS MAM#
+autoplot(cameron_ets) #I just used the snipping tool to get the seperate component plots#
