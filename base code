@@ -10,3 +10,173 @@ autoplot(cameron, ylab='Tax Receipts ($)', xlab='Time', main='Cameron County Sal
 
 cameron_ets <- ets(cameron,"ZZZ) #RETURNS MAM#
 autoplot(cameron_ets) #I just used the snipping tool to get the seperate component plots#
+
+#Q2#
+library(fpp2)
+library(tseries)
+setwd("/Users/Roberthull/Desktop/ECMT_674/Team Project")
+
+Cameron<- ts(Texas_County_Sales_taxes$Cameron, frequency=12, start=c(2012,12))
+autoplot(Cameron)+
+  ggtitle("Sales Tax Revenue - Cameron County")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Establishing Training Sub-Set
+training <- window(Cameron,end=c(2020,8))
+autoplot(training)+
+  ggtitle("Sales Tax Revenue for Cameron County - Training Sub-Set")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Establishing Test(Accuracy) Sub-Set
+test <- window(Cameron, start=c(2020,9), end=c(2021,2))
+autoplot(test)+
+  ggtitle("Sales Tax Revenue for Cameron County - Test Sub-Set")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+
+#Question 2 Part ii
+#Present a six-month ahead forecast for September, 2020 – February, 2021. 
+#How do your forecasts compare to the actual values for the Sales Tax variable?
+
+#Creating ETS Forecast
+#ETS Function
+ETS <- ets(training,"ZZZ")
+
+#ETS Forecast
+CameronETSForecast <-forecast(ETS,h=6)$mean
+autoplot(training)+
+  autolayer(CameronETSForecast)+
+  ggtitle("Sales Tax Receipts - ETS Forecast for Cameron County")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating Accuracy Measure
+accuracyETS <- accuracy(CameronETSForecast,test)
+
+#Converting Accuracy Data to Table Format
+write.csv(accuracyETS, "accuracyETS.csv")
+
+#Creating Arima Forecast
+CameronArima <- auto.arima(training,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
+CameronArimaForecast <- forecast(CameronArima,h=6)$mean
+autoplot(training)+
+  autolayer(CameronArimaForecast)+
+  ggtitle("Sales Tax Receipts - Arima Forecast for Cameron County")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating Accuracy Measure
+accuracyARIMA <- accuracy(CameronArimaForecast,test)
+
+#Converting Accuracy Data to Table Format
+write.csv(accuracyARIMA, "accuracyARIMA.csv")
+
+
+#Layering Both ETS AND ARIMA WITH ACTUAL DATA
+autoplot(test)+
+  autolayer(CameronETSForecast)+
+  autolayer(CameronArimaForecast)+
+  ggtitle("Sales Tax Receipts - Comparison of ETS, Arima, and Orginial")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+
+
+#Question 2 Part iii:
+# Present a series of 6 one-step-ahead forecasts September, 2020 – February, 2021. 
+#How do your forecasts compare to the actual values for the Sales Tax variable?
+
+#Creating ETS Onestep
+CameronETSOnestep <- ts(vector(length=6), frequency=12, start=c(2020,9))
+jj <- 1
+for (i in c(9, 10, 11, 12, 1, 2)) {
+  if(i==1) {j=2021} else {j=2020}
+  training2 <- window(Cameron, end=c(j,i))
+  ETS2 <- ets(training2, model = "MAM")
+  zz <- forecast(ETS2, h=1)
+  CameronETSOnestep[jj] <- zz$mean
+  jj <- jj+1
+}
+#Plotting CameronETSOnestep and ETS forecast
+autoplot(window(Cameron, start=c(2010,1), end=c(2020,8)))+
+  autolayer(CameronETSForecast)+
+  autolayer(CameronETSOnestep)+
+  ggtitle("Sales Tax Receipts - ETS Onestep Forecast")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Creating Accuracy Measure for ETS One-Step-Ahead Forecasts
+accuracyETSOnestep <- accuracy(onestep1,test)
+
+#Converting Accuracy Data to Table Format
+write.csv(accuracyETSOnestep, "accuracyETSOnestep.csv")
+
+
+#Creating ArimaOnestep
+CameronArimaOnestep <- ts(c(1,1,1,1,1,1), frequency=12, start=c(2020,9))
+
+for (j in c(1,2,9,10,11,12)){
+  if (j == 1)
+  {training3 <- window(Cameron, end=c(2020,12))}
+  else if (j == 2)
+  {training3 <- window(Cameron, end=c(2021,1))}
+  else
+  {training3 <- window(Cameron, end=c(2020,j-1))}
+  arimaOnestep <- auto.arima(training3,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
+  CameronArimaOnestep[(j > 3)*(j-8)+(j < 3)*(4+j)] <- forecast(arimaOnestep,h=1)$mean
+}
+#Plotting ArimaOnestep and Arima Forecast
+autoplot(window(Cameron, start=c(2010,1), end=c(2020,8)))+
+  autolayer(CameronArimaForecast)+
+  autolayer(CameronArimeOnestep)+
+  ggtitle("Sales Tax Receipts - Arima Onestep Forecast")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+#Arima Accuracy Method
+accuracyArimaOnestep <- accuracy(test,CameronArimaOnestep)
+write.csv(accuracyArimaOnestep, "accuracyArimaOnestep.csv")
+
+#Plot of ETS/Arima Onesteps compared to original test set
+autoplot(test)+
+  autolayer(CameronETSOnestep)+
+  autolayer(CameronArimaOnestep)+
+  ggtitle("Sales Tax Receipts - Comparison of ETS/Arima Onesteps and Orginial")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#12 Month Forecast
+
+#Bringing in orginal test data
+test2 <- window(Cameron, start=c(2020,9), end=c(2021,2))
+autoplot(test)+
+  ggtitle("Sales Tax Revenue for Cameron County - Test Sub-Set NEW")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+
+#Creating ArimaOnestep for 12 Months
+CameronArimaOnestep12Month <- ts(c(1,1,1,1,1,1,1,1,1,1,1,1), frequency=12, start=c(2021,3))
+
+for (j in c(3,4,5,6,7,8,9,10,11,12,1,2)){
+  if (j == 1)
+  {training4 <- window(test2, end=c(2021,12))}
+  else if (j == 2)
+  {training4 <- window(test2, end=c(2022,2))}
+  else
+  {training4 <- window(test2, end=c(2021,j-1))}
+  arimaOnestep12Month <- auto.arima(training4,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
+  CameronArimaOnestep12Month[(j > 3)*(j-8)+(j < 3)*(4+j)] <- forecast(arimaOnestep12Month,h=1)$mean
+}
+#Plotting ArimaOnestep and Arima Forecast
+autoplot(window(test2, start=c(2020,9), end=c(2021,2)))+
+  autolayer(CameronArimaOnestep12Month)+
+  ggtitle("Sales Tax Receipts - Arima Onestep Forecast for 12 Months")+
+  xlab("Years")+
+  ylab("Sales Tax Receipts - US Dollars ($)")
+
+#Arima Accuracy Method
+accuracyArimaOnestep12Month <- accuracy(test,CameronArimaOnestep12Month)
+write.csv(accuracyArimaOnestep12Month, "accuracyArimaOnestep12Month.csv")
