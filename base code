@@ -29,7 +29,7 @@ autoplot(test)+
 ETS <- ets(training,"ZZZ")
 
 #ETS Forecast
-CameronETSForecast <-forecast(ETS,h=6)$mean
+CameronETSForecast <-forecast(ETS,h=6)
 autoplot(training)+
   autolayer(CameronETSForecast)+
   ggtitle("Sales Tax Receipts - ETS Forecast for Cameron County")+
