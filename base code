@@ -147,36 +147,13 @@ autoplot(test)+
   xlab("Years")+
   ylab("Sales Tax Receipts - US Dollars ($)")
 
-#12 Month Forecast
 
-#Bringing in orginal test data
-test2 <- window(Cameron, start=c(2020,9), end=c(2021,2))
-autoplot(test)+
-  ggtitle("Sales Tax Revenue for Cameron County - Test Sub-Set NEW")+
+#Creating Arima Forecast for 12 month period
+CameronArima2 <- auto.arima(Cameron,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
+CameronArimaForecast2 <- forecast(CameronArima2,h=12)$mean
+autoplot(Cameron)+
+  autolayer(CameronArimaForecast2)+
+  ggtitle("Sales Tax Receipts - 12 Month Arima Forecast for Cameron County")+
   xlab("Years")+
   ylab("Sales Tax Receipts - US Dollars ($)")
 
-
-#Creating ArimaOnestep for 12 Months
-CameronArimaOnestep12Month <- ts(c(1,1,1,1,1,1,1,1,1,1,1,1), frequency=12, start=c(2021,3))
-
-for (j in c(3,4,5,6,7,8,9,10,11,12,1,2)){
-  if (j == 1)
-  {training4 <- window(test2, end=c(2021,12))}
-  else if (j == 2)
-  {training4 <- window(test2, end=c(2022,2))}
-  else
-  {training4 <- window(test2, end=c(2021,j-1))}
-  arimaOnestep12Month <- auto.arima(training4,seasonal = TRUE,stepwise = FALSE,approximation = FALSE)
-  CameronArimaOnestep12Month[(j > 3)*(j-8)+(j < 3)*(4+j)] <- forecast(arimaOnestep12Month,h=1)$mean
-}
-#Plotting ArimaOnestep and Arima Forecast
-autoplot(window(test2, start=c(2020,9), end=c(2021,2)))+
-  autolayer(CameronArimaOnestep12Month)+
-  ggtitle("Sales Tax Receipts - Arima Onestep Forecast for 12 Months")+
-  xlab("Years")+
-  ylab("Sales Tax Receipts - US Dollars ($)")
-
-#Arima Accuracy Method
-accuracyArimaOnestep12Month <- accuracy(test,CameronArimaOnestep12Month)
-write.csv(accuracyArimaOnestep12Month, "accuracyArimaOnestep12Month.csv")
