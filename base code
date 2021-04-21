@@ -157,3 +157,30 @@ autoplot(Cameron)+
   xlab("Years")+
   ylab("Sales Tax Receipts - US Dollars ($)")
 
+
+#Q3#
+library(readxl)
+Leading_Indicators_with_lags=read_excel("Leading Indicators with lags.xlsx")
+
+# For ease of coding
+# y =ts Cameron Sales Tax
+# x1=ts lagged real estate sales
+# x2=ts lagged consumer confidence index
+
+
+y=ts(Leading_Indicators_with_lags$`Cameron Sales Tax`,start = c(2013,7),end = c(2021,2),frequency = 12)
+x1=ts(Leading_Indicators_with_lags$`Real Estate Sales (lagged)`,start = c(2013,7),end = c(2021,2),frequency = 12)
+x2=ts(Leading_Indicators_with_lags$`Consumer Confidence Index TX (lagged)`,start = c(2013,7),end = c(2021,2),frequency = 12)
+
+model=tslm(y~x1+x2+season)
+
+library(ggplot2)
+autoplot(y,xlab="Time",ylab="Sales Tax")+ggtitle("Cameron County Sales Tax Receipts")+autolayer(fitted(model))
+summary(model)
+
+#I also created a new dataset with the forecast variables
+library(readxl)
+Forecast_Data=read_excel("Forecast Data.xlsx")
+
+forecast=forecast(model, Forecast_Data, h=12, level = 95)
+autoplot(forecast,xlab="Time",ylab="Sales Tax")+ggtitle("Forecasted County Sales Tax Receipts")
