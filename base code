@@ -172,6 +172,10 @@ y=ts(Leading_Indicators_with_lags$`Cameron Sales Tax`,start = c(2013,7),end = c(
 x1=ts(Leading_Indicators_with_lags$`Real Estate Sales (lagged)`,start = c(2013,7),end = c(2021,2),frequency = 12)
 x2=ts(Leading_Indicators_with_lags$`Consumer Confidence Index TX (lagged)`,start = c(2013,7),end = c(2021,2),frequency = 12)
 
+#test for correlation
+cor.test(y,x1,method = "pearson")
+cor.test(y,x2,method = "pearson")
+
 model=tslm(y~x1+x2+season)
 
 library(ggplot2)
